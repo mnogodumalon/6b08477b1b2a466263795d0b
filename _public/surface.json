@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "pages": [
+    {
+      "slug": "erfindung-melden",
+      "component": "ErfindungMelden",
+      "title": "Erfindung melden",
+      "endpoints": [
+        {
+          "entity": "erfindungsmeldungen",
+          "op": "create",
+          "fields": [
+            "melder_vorname",
+            "melder_nachname",
+            "melder_email",
+            "melder_telefon",
+            "abteilung",
+            "erfindungsart",
+            "titel",
+            "technisches_gebiet",
+            "problem",
+            "loesung",
+            "vorteile",
+            "fertigstellung",
+            "miterfinder",
+            "betriebliche_mittel",
+            "mittel_beschreibung"
+          ],
+          "preset_fields": {
+            "status": "eingegangen"
+          }
+        }
+      ]
+    }
+  ]
+}
