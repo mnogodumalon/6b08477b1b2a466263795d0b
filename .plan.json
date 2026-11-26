@@ -1,0 +1,255 @@
+{
+  "version": 1,
+  "language": "de",
+  "understanding": {
+    "summary": "Arbeitnehmer melden ihre Erfindungen (Diensterfindung oder freie Erfindung) über ein öffentliches Formular, das auf einer Firmenseite eingebettet oder per Link geöffnet wird. Die Meldung enthält Titel, Gebiet, Ausgangsproblem, Lösung, Vorteile, Miterfinder und die Angabe zu betrieblichen Mitteln. Neue Meldungen erhalten automatisch Meldedatum und Status „Eingegangen“. Mitarbeiter mit Login sehen eine übersichtliche Liste der Meldungen und bearbeiten sie in einem Ablauf mit Bearbeitungsschritten (Prüfung, Inanspruchnahme, Freigabe, Ablehnung). Der Bereich „Einreichende Personen“ ist mit den Meldungen verknüpft.",
+    "outside_users": [
+      {
+        "who": "Arbeitnehmer",
+        "does": "melden ihre Erfindung über das öffentliche Formular ohne Login"
+      }
+    ],
+    "roles": [
+      "Arbeitnehmer (Einreichende Person)",
+      "Erfindungsmanager / Sachbearbeiter"
+    ],
+    "main_tasks": [
+      "Erfindung über das öffentliche Formular melden",
+      "Meldungen prüfen und Status ändern",
+      "Bearbeitungsschritte dokumentieren",
+      "Meldungen je einreichender Person einsehen"
+    ],
+    "platform_roles": [
+      {
+        "persona": "Erfindungsmanager / Sachbearbeiter",
+        "role": "datenverarbeitung",
+        "apps": [
+          "erfindungsmeldungen",
+          "bearbeitungsschritte",
+          "einreichende_personen"
+        ]
+      },
+      {
+        "persona": "Arbeitnehmer (Einreichende Person)",
+        "role": "standard",
+        "apps": [
+          "erfindungsmeldungen",
+          "einreichende_personen"
+        ]
+      }
+    ],
+    "wish_kind": "plain",
+    "wish_signals": []
+  },
+  "flows": [
+    {
+      "slug": "meldung-bearbeiten",
+      "label": {
+        "de": "Meldung bearbeiten",
+        "en": "Process invention report"
+      },
+      "description": "Der Sachbearbeiter wählt eine eingegangene Meldung, dokumentiert einen Bearbeitungsschritt und setzt den Bearbeitungsstatus der Meldung entsprechend.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "bearbeitungsschritte",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "meldung": "picked",
+            "schrittart": "user",
+            "schrittdatum": "derived:today",
+            "bearbeiter_vorname": "user",
+            "bearbeiter_nachname": "user",
+            "schrittstatus": "user",
+            "notiz": "user"
+          },
+          "multiple": false,
+          "needs": {},
+          "defaults": []
+        },
+        {
+          "entity": "erfindungsmeldungen",
+          "op": "update",
+          "when": "always",
+          "fields": {
+            "status": "user"
+          },
+          "multiple": false,
+          "needs": {},
+          "defaults": []
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `meldung-bearbeiten` — Meldung bearbeiten\nDer Sachbearbeiter wählt eine eingegangene Meldung, dokumentiert einen Bearbeitungsschritt und setzt den Bearbeitungsstatus der Meldung entsprechend.\n\n## Your hook — import it, never rebuild what it owns\n`import { useMeldungBearbeitenFlow } from '@/lib/journey/flows/MeldungBearbeiten';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: meldung), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `erfindungsmeldungen`: `{...flow.picks.erfindungsmeldungen.select} {...flow.pick('erfindungsmeldungen')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Offene Meldung (Eingegangen oder In Prüfung) auswählen\n2. Art des Schritts, Datum, Bearbeiter und Notiz erfassen\n3. Neuen Bearbeitungsstatus der Meldung wählen und speichern\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `bearbeitungsschritte`:\n    - `meldung`: from the record the user picks in this flow\n    - `schrittart`: the user enters it (bind it through the layer: form.field/…)\n    - `schrittdatum`: derived: today() — set it in the plan step, never ask\n    - `bearbeiter_vorname`: the user enters it (bind it through the layer: form.field/…)\n    - `bearbeiter_nachname`: the user enters it (bind it through the layer: form.field/…)\n    - `schrittstatus`: the user enters it (bind it through the layer: form.field/…)\n    - `notiz`: the user enters it (bind it through the layer: form.field/…)\n- updates `erfindungsmeldungen`:\n    - `status`: the user enters it (bind it through the layer: form.field/…)\n\n## Reads\n- `erfindungsmeldungen` columns titel, melder_nachname, erfindungsart, meldedatum, status\n\n## Success page\n- the success page offers the way back — `undo={flow.undo}` on <SuccessStep>: „Status zurücksetzen“ sets status=eingegangen\n- shows: `erfindungsmeldungen.titel`, `erfindungsmeldungen.status`, `bearbeitungsschritte.schrittart`\n\n## Never write these — another flow or a tool owns them\n- `erfindungsmeldungen.melder_vorname` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.melder_nachname` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.melder_email` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.erfindungsart` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.titel` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.technisches_gebiet` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.problem` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.loesung` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.vorteile` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.fertigstellung` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.miterfinder` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.betriebliche_mittel` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.mittel_beschreibung` (owner: intent `meldung-erfassen`)\n- `erfindungsmeldungen.meldedatum` (owner: tool `meldedatum-setzen`)\n- `einreichende_personen.vorname` (owner: tool `einreichende-person-verknuepfen`)\n- `einreichende_personen.nachname` (owner: tool `einreichende-person-verknuepfen`)\n- `einreichende_personen.email` (owner: tool `einreichende-person-verknuepfen`)\n- `einreichende_personen.telefon` (owner: tool `einreichende-person-verknuepfen`)\n- `einreichende_personen.abteilung` (owner: tool `einreichende-person-verknuepfen`)\n- `erfindungsmeldungen.einreichende_person` (owner: tool `einreichende-person-verknuepfen`)\n"
+    },
+    {
+      "slug": "meldung-erfassen",
+      "label": {
+        "de": "Meldung intern erfassen",
+        "en": "Record report internally"
+      },
+      "description": "Der Sachbearbeiter erfasst eine Erfindungsmeldung, die schriftlich oder mündlich einging, mit den Angaben der meldenden Person. Die Verknüpfung mit der Einreichenden Person übernimmt ein Werkzeug über die E-Mail-Adresse.",
+      "priority": "nice",
+      "writes": [
+        {
+          "entity": "erfindungsmeldungen",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "melder_vorname": "user",
+            "melder_nachname": "user",
+            "melder_email": "user",
+            "erfindungsart": "user",
+            "titel": "user",
+            "technisches_gebiet": "user",
+            "problem": "user",
+            "loesung": "user",
+            "vorteile": "user",
+            "fertigstellung": "user",
+            "miterfinder": "user",
+            "betriebliche_mittel": "user",
+            "mittel_beschreibung": "user",
+            "status": "fixed:eingegangen"
+          },
+          "multiple": false,
+          "needs": {
+            "einreichende_person": [
+              "melder_email"
+            ]
+          },
+          "defaults": []
+        }
+      ],
+      "required": [
+        "erfindungsmeldungen.melder_email"
+      ],
+      "brief": "# Flow `meldung-erfassen` — Meldung intern erfassen\nDer Sachbearbeiter erfasst eine Erfindungsmeldung, die schriftlich oder mündlich einging, mit den Angaben der meldenden Person. Die Verknüpfung mit der Einreichenden Person übernimmt ein Werkzeug über die E-Mail-Adresse.\n\n## Your hook — import it, never rebuild what it owns\n`import { useMeldungErfassenFlow } from '@/lib/journey/flows/MeldungErfassen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Vorname, Nachname und E-Mail-Adresse der meldenden Person erfassen\n2. Angaben zur Erfindung erfassen\n3. Speichern\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `erfindungsmeldungen`:\n    - `melder_vorname`: the user enters it (bind it through the layer: form.field/…)\n    - `melder_nachname`: the user enters it (bind it through the layer: form.field/…)\n    - `melder_email`: the user enters it (bind it through the layer: form.field/…) — **REQUIRED in this flow** (mark it required and validate it before the step advances, whatever the app's base view says): intent `meldung-erfassen` → `einreichende_person`, tool `einreichende-person-verknuepfen` → `einreichende_person` cannot be built without it\n    - `erfindungsart`: the user enters it (bind it through the layer: form.field/…)\n    - `titel`: the user enters it (bind it through the layer: form.field/…)\n    - `technisches_gebiet`: the user enters it (bind it through the layer: form.field/…)\n    - `problem`: the user enters it (bind it through the layer: form.field/…)\n    - `loesung`: the user enters it (bind it through the layer: form.field/…)\n    - `vorteile`: the user enters it (bind it through the layer: form.field/…)\n    - `fertigstellung`: the user enters it (bind it through the layer: form.field/…)\n    - `miterfinder`: the user enters it (bind it through the layer: form.field/…)\n    - `betriebliche_mittel`: the user enters it (bind it through the layer: form.field/…)\n    - `mittel_beschreibung`: the user enters it (bind it through the layer: form.field/…)\n    - `status`: fixed value `eingegangen` — set it in the plan step's values, never ask\n\n## Success page\n- the review ends with ONE button per way to finish — spread `variants={flow.actions}` onto <SummaryStep>, never write your own confirm buttons: „Speichern“ sets status=eingegangen; „Speichern und in Prüfung setzen“ sets status=in_pruefung\n- shows: `erfindungsmeldungen.titel`, `erfindungsmeldungen.status`\n- next flows to offer: `meldung-bearbeiten`\n\n## Never write these — another flow or a tool owns them\n- `bearbeitungsschritte.meldung` (owner: intent `meldung-bearbeiten`)\n- `bearbeitungsschritte.schrittart` (owner: intent `meldung-bearbeiten`)\n- `bearbeitungsschritte.schrittdatum` (owner: intent `meldung-bearbeiten`)\n- `bearbeitungsschritte.bearbeiter_vorname` (owner: intent `meldung-bearbeiten`)\n- `bearbeitungsschritte.bearbeiter_nachname` (owner: intent `meldung-bearbeiten`)\n- `bearbeitungsschritte.schrittstatus` (owner: intent `meldung-bearbeiten`)\n- `bearbeitungsschritte.notiz` (owner: intent `meldung-bearbeiten`)\n- `erfindungsmeldungen.meldedatum` (owner: tool `meldedatum-setzen`)\n- `einreichende_personen.vorname` (owner: tool `einreichende-person-verknuepfen`)\n- `einreichende_personen.nachname` (owner: tool `einreichende-person-verknuepfen`)\n- `einreichende_personen.email` (owner: tool `einreichende-person-verknuepfen`)\n- `einreichende_personen.telefon` (owner: tool `einreichende-person-verknuepfen`)\n- `einreichende_personen.abteilung` (owner: tool `einreichende-person-verknuepfen`)\n- `erfindungsmeldungen.einreichende_person` (owner: tool `einreichende-person-verknuepfen`)\n"
+    }
+  ],
+  "public_pages": [
+    {
+      "slug": "erfindung-melden",
+      "purpose": "Arbeitnehmer melden ohne Login ihre Erfindung (Diensterfindung oder freie Erfindung) über ein vorgefertigtes Formular. Die Seite lässt sich auf einer Firmenseite einbetten oder per Link öffnen. Meldedatum und Status setzt das System.",
+      "publish": true,
+      "lists": [],
+      "creates": [
+        {
+          "entity": "erfindungsmeldungen",
+          "fields": {
+            "melder_vorname": "user",
+            "melder_nachname": "user",
+            "melder_email": "user",
+            "melder_telefon": "user",
+            "abteilung": "user",
+            "erfindungsart": "user",
+            "titel": "user",
+            "technisches_gebiet": "user",
+            "problem": "user",
+            "loesung": "user",
+            "vorteile": "user",
+            "fertigstellung": "user",
+            "miterfinder": "user",
+            "betriebliche_mittel": "user",
+            "mittel_beschreibung": "user"
+          },
+          "fixed": {
+            "status": "eingegangen"
+          }
+        }
+      ],
+      "visitor_fields": [],
+      "page_sets": [],
+      "record_key": {},
+      "editable": {},
+      "edit_own": false,
+      "link_param": null,
+      "door_per_record": null,
+      "vote": null,
+      "brief": "# Public page `erfindung-melden`\nArbeitnehmer melden ohne Login ihre Erfindung (Diensterfindung oder freie Erfindung) über ein vorgefertigtes Formular. Die Seite lässt sich auf einer Firmenseite einbetten oder per Link öffnen. Meldedatum und Status setzt das System.\n\n## Creates (declare exactly these in the surface)\n- `erfindungsmeldungen`: visitor fields `melder_vorname`, `melder_nachname`, `melder_email`, `melder_telefon`, `abteilung`, `erfindungsart`, `titel`, `technisches_gebiet`, `problem`, `loesung`, `vorteile`, `fertigstellung`, `miterfinder`, `betriebliche_mittel`, `mittel_beschreibung`; preset_fields {\"status\": \"eingegangen\"}\n\n## Availability — mechanical, write nothing for it\nA picker (`useRecordSearch`) never offers a record another record already takes (a booked slot) — the layer leaves it out. To SHOW booked periods, call `useOccupancy(port, '<entity>')` and hand `blocked` to AvailabilityRangePicker; the integration gives the page exactly that read (dates or the reference, never who booked). Never declare a list of bookings with names or contacts to work availability out yourself.\n\nPublish: never from here — every page starts as a draft; the owner publishes it under Verwaltung → Öffentliche Seiten after the build (the plan wishes it published)\n"
+    }
+  ],
+  "tools": [
+    {
+      "id": "meldedatum-setzen",
+      "purpose": "Setzt bei jeder neuen Erfindungsmeldung das Meldedatum aus der Serveruhr, weil die öffentliche Seite kein Datum liefern darf. Hat der interne Ablauf das Datum schon gesetzt, bleibt es unverändert."
+    },
+    {
+      "id": "einreichende-person-verknuepfen",
+      "purpose": "Verknüpft eine neue Meldung mit der Einreichenden Person, die dieselbe E-Mail-Adresse hat. Gibt es keine, wird die Person aus den Angaben der Meldung angelegt. Ist die Person schon gesetzt, passiert nichts."
+    },
+    {
+      "id": "eingangsbestaetigung-vermerken",
+      "purpose": "Legt bei jeder neuen Meldung den Bearbeitungsschritt Eingangsbestätigung als offenen Schritt an, damit die Sachbearbeitung von Anfang an einen Verlauf hat."
+    },
+    {
+      "id": "neue-meldung-mailen",
+      "purpose": "Schickt dem Schlüsselinhaber eine Mail mit Titel, Art und Melder der neuen Erfindungsmeldung. Es wird nichts geschrieben."
+    }
+  ],
+  "covered_by_platform": [
+    {
+      "wish": "übersichtliche Liste all seiner Meldungen",
+      "feature": "list_page"
+    },
+    {
+      "wish": "Zugriff nur auf eigene Meldungen für Arbeitnehmer",
+      "feature": "user_roles"
+    },
+    {
+      "wish": "Bereich Einreichende Personen hinzufügen",
+      "feature": "record_form"
+    }
+  ],
+  "ownership": {
+    "bearbeitungsschritte": {
+      "meldung": "tool:eingangsbestaetigung-vermerken",
+      "schrittart": "tool:eingangsbestaetigung-vermerken",
+      "schrittdatum": "tool:eingangsbestaetigung-vermerken",
+      "bearbeiter_vorname": "intent:meldung-bearbeiten",
+      "bearbeiter_nachname": "intent:meldung-bearbeiten",
+      "schrittstatus": "tool:eingangsbestaetigung-vermerken",
+      "notiz": "intent:meldung-bearbeiten"
+    },
+    "erfindungsmeldungen": {
+      "status": "intent:meldung-erfassen",
+      "melder_vorname": "intent:meldung-erfassen",
+      "melder_nachname": "intent:meldung-erfassen",
+      "melder_email": "intent:meldung-erfassen",
+      "erfindungsart": "intent:meldung-erfassen",
+      "titel": "intent:meldung-erfassen",
+      "technisches_gebiet": "intent:meldung-erfassen",
+      "problem": "intent:meldung-erfassen",
+      "loesung": "intent:meldung-erfassen",
+      "vorteile": "intent:meldung-erfassen",
+      "fertigstellung": "intent:meldung-erfassen",
+      "miterfinder": "intent:meldung-erfassen",
+      "betriebliche_mittel": "intent:meldung-erfassen",
+      "mittel_beschreibung": "intent:meldung-erfassen",
+      "meldedatum": "tool:meldedatum-setzen",
+      "einreichende_person": "tool:einreichende-person-verknuepfen"
+    },
+    "einreichende_personen": {
+      "vorname": "tool:einreichende-person-verknuepfen",
+      "nachname": "tool:einreichende-person-verknuepfen",
+      "email": "tool:einreichende-person-verknuepfen",
+      "telefon": "tool:einreichende-person-verknuepfen",
+      "abteilung": "tool:einreichende-person-verknuepfen"
+    }
+  },
+  "dashboard": {
+    "focus": [
+      "Neu eingegangene Meldungen (Status Eingegangen)",
+      "Meldungen in Prüfung",
+      "Offene Bearbeitungsschritte",
+      "Meldungen je Status und je einreichender Person"
+    ],
+    "hints": [
+      "Meldungen nach Bearbeitungsstatus gruppiert anzeigen",
+      "Zu jeder Meldung die zugehörigen Bearbeitungsschritte zeigen"
+    ],
+    "views": [],
+    "writes": [],
+    "wishes": []
+  }
+}

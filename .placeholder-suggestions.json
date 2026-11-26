@@ -1,0 +1,31 @@
+{
+  "EinreichendePersonenDialog.tsx": {
+    "vorname": "z. B. Anna",
+    "nachname": "z. B. Müller",
+    "email": "z. B. anna.mueller@firma.de",
+    "abteilung": "z. B. Forschung, Entwicklung"
+  },
+  "ErfindungsmeldungenDialog.tsx": {
+    "einreichende_person": "Wer meldet?",
+    "melder_vorname": "z. B. Anna",
+    "melder_nachname": "z. B. Müller",
+    "melder_email": "z. B. anna.mueller@firma.de",
+    "abteilung": "z. B. Entwicklung",
+    "titel": "z. B. Selbstreinigender Filter",
+    "technisches_gebiet": "z. B. Maschinenbau",
+    "problem": "Welches Problem wird gelöst?",
+    "loesung": "Wie funktioniert die Lösung?",
+    "vorteile": "Welche Vorteile bringt sie?",
+    "fertigstellung": "Wann wurde sie fertig?",
+    "miterfinder": "Ein Miterfinder pro Zeile",
+    "mittel_beschreibung": "Welche Mittel wurden genutzt?",
+    "meldedatum": "Wann wird gemeldet?"
+  },
+  "BearbeitungsschritteDialog.tsx": {
+    "meldung": "Welche Meldung?",
+    "schrittdatum": "Wann fand der Schritt statt?",
+    "bearbeiter_vorname": "z. B. Anna",
+    "bearbeiter_nachname": "z. B. Müller",
+    "notiz": "Hinweise zum Bearbeitungsschritt"
+  }
+}

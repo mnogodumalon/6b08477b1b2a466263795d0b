@@ -1,0 +1,27 @@
+{
+  "entities": {
+    "Einreichende Personen": {
+      "placeholders_set": 4,
+      "defaults_keys": [],
+      "computed_keys": [],
+      "reason": "Reine Stammdaten ohne numerische Felder, daher keine Formeln oder Standardwerte."
+    },
+    "Erfindungsmeldungen": {
+      "placeholders_set": 14,
+      "defaults_keys": [
+        "status"
+      ],
+      "computed_keys": [],
+      "reason": "Keine Formeln, da das Formular nur Text- und Datumsfelder ohne numerische Berechnung enthält."
+    },
+    "Bearbeitungsschritte": {
+      "placeholders_set": 5,
+      "defaults_keys": [
+        "schrittdatum",
+        "schrittstatus"
+      ],
+      "computed_keys": [],
+      "reason": "Keine Formeln, da der Entity keine numerischen Felder oder Datumspaare enthält und nur Bearbeitungsschritte protokolliert."
+    }
+  }
+}

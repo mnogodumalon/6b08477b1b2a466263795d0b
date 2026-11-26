@@ -1,0 +1,24 @@
+{
+  "pages": {
+    "en": {
+      "Alle Bearbeitungsschritte sind erledigt.": "All processing steps are completed.",
+      "Alle Meldungen sind in Bearbeitung — nichts Neues eingegangen.": "All disclosures are in progress — nothing new has come in.",
+      "Bearbeiten": "Edit",
+      "Im Ablauf bearbeiten": "Edit in workflow",
+      "Jetzt prüfen": "Review now",
+      "Meldung intern erfassen": "Record disclosure internally",
+      "Meldungen je einreichender Person": "Disclosures per submitting person",
+      "Noch keine Meldungen — sobald jemand eine Erfindung meldet, erscheint sie hier.": "No disclosures yet — as soon as someone submits an invention, it will appear here.",
+      "Offene Bearbeitungsschritte": "Open processing steps",
+      "Ohne Meldung": "No disclosure",
+      "Ohne Titel": "Untitled",
+      "Ohne einreichende Person": "No submitting person",
+      "Person anlegen": "Add person",
+      "Schritt": "Step",
+      "seit über einer Woche unbearbeitet — ältestes Eingang vor {0} Tagen.": "unprocessed for over a week — oldest received {0} days ago.",
+      "{0} {1} auf Prüfung.": "{0} {1} awaiting review.",
+      "{0}/{1} Schritte": "{0}/{1} steps"
+    }
+  },
+  "v": 1
+}
